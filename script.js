@@ -1,6 +1,6 @@
 /* =========================================================
    Grupo HCMC — script.js
-   Depende de: data.js (HCMC_CONFIG)
+   Depende de: data.js (HCMC_CONFIG) e intl-tel-input
    ========================================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -233,6 +233,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') document.querySelectorAll('.modal.open').forEach(closeModal);
     });
 
+    /* ---------- Selector de país para teléfono (intl-tel-input) ---------- */
+    const telInput = document.getElementById('telefono');
+    let iti = null;
+
+    if (telInput && typeof window.intlTelInput === 'function') {
+        iti = window.intlTelInput(telInput, {
+            initialCountry: 'cr',
+            preferredCountries: ['cr', 'us', 'es', 'mx', 'pa', 'ni'],
+            separateDialCode: true,
+            utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.0/build/js/utils.js'
+        });
+
+        // Validación en vivo: al escribir, limpia el error si el número es válido
+        telInput.addEventListener('input', () => {
+            telInput.setCustomValidity('');
+        });
+    }
+
     /* ---------- Servicio preseleccionado ---------- */
     const form = document.querySelector('#contact-form');
     const servicioInput = document.getElementById('servicio');
@@ -295,9 +313,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const originalText = label ? label.textContent : submitBtn.textContent;
 
             const emailInput = document.getElementById('email');
-            const telInput = document.getElementById('telefono');
 
-            // Validación: al menos correo o teléfono
+            // --- Validación: al menos correo o teléfono ---
             emailInput.setCustomValidity('');
             telInput.setCustomValidity('');
 
@@ -311,11 +328,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 emailInput.reportValidity();
                 return;
             }
-            if (hasEmail && !emailInput.checkValidity()) { emailInput.reportValidity(); return; }
-            if (hasTel && !telInput.checkValidity()) { telInput.reportValidity(); return; }
-            if (!form.checkValidity()) { form.reportValidity(); return; }
 
-            // Verificar que la URL esté configurada
+            if (hasEmail && !emailInput.checkValidity()) {
+                emailInput.reportValidity();
+                return;
+            }
+
+            // Validación del teléfono con intl-tel-input
+            if (hasTel && iti && !iti.isValidNumber()) {
+                telInput.setCustomValidity('Ingresa un número de teléfono válido para el país seleccionado.');
+                telInput.reportValidity();
+                return;
+            }
+
+            // Validación del resto (nombre, mensaje)
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Verificar que la URL del Apps Script esté configurada
             if (!CONFIG.appsScriptUrl || CONFIG.appsScriptUrl.includes('TU_URL')) {
                 msg.textContent = 'El formulario aún no está conectado. Escríbenos a ' + (CONFIG.contactEmail || 'informacion@grupohcmc.com') + '.';
                 msg.style.background = 'rgba(255,176,32,.15)';
@@ -324,14 +356,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // --- Preparar payload ---
+            const telefonoCompleto = (iti && hasTel) ? iti.getNumber() : telInput.value.trim();
+
             const payload = {
                 nombre: document.getElementById('nombre').value.trim(),
                 email: emailInput.value.trim(),
-                telefono: telInput.value.trim(),
+                telefono: telefonoCompleto,
                 servicio: document.getElementById('servicio').value || 'Consulta general',
                 mensaje: document.getElementById('mensaje').value.trim()
             };
 
+            // --- UI de carga ---
             submitBtn.disabled = true;
             if (label) {
                 label.textContent = 'Enviando...';
@@ -355,6 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     msg.style.color = 'var(--teal-dark)';
                     msg.classList.add('show');
                     form.reset();
+                    if (iti) iti.setNumber('');
                     clearService();
                 } else {
                     throw new Error(data.error || 'Error desconocido');

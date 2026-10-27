@@ -29,14 +29,21 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
     rel="stylesheet">
+
+  <!-- intl-tel-input CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.0/build/css/intlTelInput.css">
+
+  <!-- Tu CSS -->
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
+
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PF57V79H" height="0" width="0"
       style="display:none;visibility:hidden"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
+
   <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress-bar"></span></div>
 
   <header class="site-header">
@@ -76,8 +83,7 @@
         </div>
       </div>
       <div class="hero-tag-thumb reveal">
-        <img src="https://static.wixstatic.com/media/ea71bb_370144e721bc43c289bfb35fed3376d1~mv2_d_4500_2124_s_2.jpg"
-          alt="Grupo HCMC — Consultoría informática" loading="lazy">
+        <img src="./assets/img/ciudad.jpg" alt="Grupo HCMC — Consultoría informática" loading="lazy">
       </div>
     </div>
   </section>
@@ -360,8 +366,7 @@
       <article class="project-card reveal">
         <div class="project-inner">
           <div class="project-media">
-            <img src="https://static.wixstatic.com/media/1590f1_c3b297ae59bf4c698f3a972888ab2c4c~mv2.png"
-              alt="DODI — recepcionista digital inteligente" loading="lazy">
+            <img src="./assets/img/dodi.jpg" alt="DODI — recepcionista digital inteligente" loading="lazy">
           </div>
           <div class="project-body">
             <div class="badges">
@@ -391,11 +396,8 @@
 
       <article class="project-card reverse reveal">
         <div class="project-inner">
-          <div class="project-media two-imgs">
-            <img src="https://static.wixstatic.com/media/1590f1_ce3b7fd337464e59aa0c790182e53810~mv2.png"
-              alt="VerticalEDU — panel de la aplicación" loading="lazy">
-            <img src="https://static.wixstatic.com/media/1590f1_f25bb9d5cd2e4943911618c32a0ae073~mv2.jpg"
-              alt="VerticalEDU — integraciones" loading="lazy">
+          <div class="project-media">
+            <img src="./assets/img/verticaledu.jpg" alt="VerticalEDU — panel de la aplicación" loading="lazy">
           </div>
           <div class="project-body">
             <div class="badges">
@@ -502,8 +504,7 @@
             </div>
             <div class="field">
               <label for="telefono">Teléfono</label>
-              <input type="tel" id="telefono" name="telefono" autocomplete="tel" placeholder="Ej. 8888-8888"
-                pattern="[0-9+\-\s()]{7,20}">
+              <input type="tel" id="telefono" name="telefono" autocomplete="tel" placeholder="Ej. 8888-8888">
             </div>
           </div>
 
@@ -699,6 +700,9 @@
       </div>
     </div>
   </div>
+
+  <!-- intl-tel-input JS -->
+  <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.0/build/js/intlTelInput.min.js"></script>
 
   <!-- data.js va ANTES que script.js -->
   <script src="data.js"></script>
