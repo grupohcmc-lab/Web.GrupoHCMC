@@ -244,11 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
             separateDialCode: true,
             utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.0/build/js/utils.js'
         });
-
-        // Validación en vivo: al escribir, limpia el error si el número es válido
-        telInput.addEventListener('input', () => {
-            telInput.setCustomValidity('');
-        });
     }
 
     /* ---------- Servicio preseleccionado ---------- */
@@ -314,9 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const emailInput = document.getElementById('email');
 
-            // --- Validación: al menos correo o teléfono ---
+            // Validación: al menos correo o teléfono
             emailInput.setCustomValidity('');
-            telInput.setCustomValidity('');
 
             const hasEmail = emailInput.value.trim() !== '';
             const hasTel = telInput.value.trim() !== '';
@@ -324,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!hasEmail && !hasTel) {
                 const m = 'Debes ingresar al menos un correo o un teléfono.';
                 emailInput.setCustomValidity(m);
-                telInput.setCustomValidity(m);
                 emailInput.reportValidity();
                 return;
             }
@@ -334,14 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Validación del teléfono con intl-tel-input
-            if (hasTel && iti && !iti.isValidNumber()) {
-                telInput.setCustomValidity('Ingresa un número de teléfono válido para el país seleccionado.');
-                telInput.reportValidity();
-                return;
-            }
-
-            // Validación del resto (nombre, mensaje)
+            // Validación nativa del resto (nombre, mensaje)
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
@@ -356,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // --- Preparar payload ---
+            // Preparar payload (teléfono con código de país si el plugin está activo)
             const telefonoCompleto = (iti && hasTel) ? iti.getNumber() : telInput.value.trim();
 
             const payload = {
@@ -367,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mensaje: document.getElementById('mensaje').value.trim()
             };
 
-            // --- UI de carga ---
+            // UI de carga
             submitBtn.disabled = true;
             if (label) {
                 label.textContent = 'Enviando...';
