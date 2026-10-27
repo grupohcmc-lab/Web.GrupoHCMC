@@ -7,14 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const CONFIG = (typeof HCMC_CONFIG !== 'undefined') ? HCMC_CONFIG : {};
 
-    /* ---------- Logging condicional (solo en desarrollo) ---------- */
+    /* ---------- Logging condicional ---------- */
     const IS_DEV = location.hostname === 'localhost' ||
         location.hostname === '127.0.0.1' ||
         location.protocol === 'file:';
-
-    function logError(...args) {
-        if (IS_DEV) console.error(...args);
-    }
+    function logError(...args) { if (IS_DEV) console.error(...args); }
 
     /* ---------- Año ---------- */
     document.querySelectorAll('[data-year]').forEach(el => {
@@ -25,31 +22,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const header = document.querySelector('.site-header');
     const progressBar = document.getElementById('scroll-progress-bar');
     let ticking = false;
-
     function onScroll() {
         const y = window.scrollY || window.pageYOffset;
         document.body.classList.toggle('scrolled', y > 20);
         if (progressBar) {
             const docH = document.documentElement.scrollHeight - window.innerHeight;
-            const pct = docH > 0 ? Math.min(100, (y / docH) * 100) : 0;
-            progressBar.style.width = pct + '%';
+            progressBar.style.width = (docH > 0 ? Math.min(100, (y / docH) * 100) : 0) + '%';
         }
         const toTop = document.getElementById('to-top');
         if (toTop) toTop.classList.toggle('show', y > 400);
     }
     window.addEventListener('scroll', () => {
-        if (!ticking) {
-            requestAnimationFrame(() => { onScroll(); ticking = false; });
-            ticking = true;
-        }
+        if (!ticking) { requestAnimationFrame(() => { onScroll(); ticking = false; }); ticking = true; }
     }, { passive: true });
     onScroll();
 
     /* ---------- Volver arriba ---------- */
     const toTop = document.getElementById('to-top');
-    if (toTop) toTop.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    if (toTop) toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
     /* ---------- Menú móvil ---------- */
     const navToggle = document.querySelector('.nav-toggle');
@@ -77,21 +67,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function setActiveLink(activeLink) {
         menuItems.forEach(a => a.classList.toggle('active', a === activeLink));
     }
-
     function updateActiveOnScroll() {
         if (!targets.length) return;
         const headerH = header ? header.offsetHeight : 0;
         const ref = headerH + 40;
         const scrollY = window.scrollY || window.pageYOffset;
         const docH = document.documentElement.scrollHeight - window.innerHeight;
-        if (scrollY >= docH - 2) {
-            setActiveLink(targets[targets.length - 1].link);
-            return;
-        }
+        if (scrollY >= docH - 2) { setActiveLink(targets[targets.length - 1].link); return; }
         let active = targets[0].link;
         for (const t of targets) {
-            if (t.section.getBoundingClientRect().top <= ref) active = t.link;
-            else break;
+            if (t.section.getBoundingClientRect().top <= ref) active = t.link; else break;
         }
         setActiveLink(active);
     }
@@ -118,16 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('in');
-                    io.unobserve(entry.target);
-                }
+                if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
             });
         }, { threshold: 0.12 });
         revealEls.forEach(el => io.observe(el));
-    } else {
-        revealEls.forEach(el => el.classList.add('in'));
-    }
+    } else { revealEls.forEach(el => el.classList.add('in')); }
 
     /* ---------- Carruseles ---------- */
     document.querySelectorAll('[data-carousel]').forEach(carousel => {
@@ -136,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const nextBtn = carousel.querySelector('[data-carousel-next]');
         const dotsWrap = carousel.querySelector('[data-carousel-dots]');
         if (!track) return;
-
         const items = Array.from(track.children);
         if (!items.length) return;
 
@@ -156,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
             i = Math.max(0, Math.min(i, items.length - 1));
             items[i].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
         }
-
         function currentIndex() {
             const trackLeft = track.getBoundingClientRect().left;
             let best = 0, bestDist = Infinity;
@@ -166,36 +144,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             return best;
         }
-
         function updateUI() {
             const maxScroll = track.scrollWidth - track.clientWidth;
             if (prevBtn) prevBtn.disabled = track.scrollLeft <= 2;
             if (nextBtn) nextBtn.disabled = track.scrollLeft >= maxScroll - 2;
-
             const idx = currentIndex();
             const firstW = items[0].getBoundingClientRect().width;
             const perView = Math.max(1, Math.floor(track.clientWidth / (firstW + 16)));
             const maxDot = Math.max(0, items.length - perView);
-
             dots.forEach((d, i) => {
                 d.style.display = i > maxDot ? 'none' : '';
                 d.classList.toggle('active', i === Math.min(idx, maxDot));
             });
         }
-
         if (prevBtn) prevBtn.addEventListener('click', () => goTo(currentIndex() - 1));
         if (nextBtn) nextBtn.addEventListener('click', () => goTo(currentIndex() + 1));
-
         let tick = false;
         track.addEventListener('scroll', () => {
-            if (!tick) {
-                requestAnimationFrame(() => { updateUI(); tick = false; });
-                tick = true;
-            }
+            if (!tick) { requestAnimationFrame(() => { updateUI(); tick = false; }); tick = true; }
         }, { passive: true });
-
         window.addEventListener('resize', updateUI);
-
         track.addEventListener('wheel', (e) => {
             if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
             const maxScroll = track.scrollWidth - track.clientWidth;
@@ -203,15 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const atStart = track.scrollLeft <= 0 && e.deltaY < 0;
             const atEnd = track.scrollLeft >= maxScroll - 1 && e.deltaY > 0;
             if (atStart || atEnd) return;
-            e.preventDefault();
-            track.scrollLeft += e.deltaY;
+            e.preventDefault(); track.scrollLeft += e.deltaY;
         }, { passive: false });
-
         track.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight') { e.preventDefault(); goTo(currentIndex() + 1); }
             else if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(currentIndex() - 1); }
         });
-
         updateUI();
     });
 
@@ -229,22 +194,17 @@ document.addEventListener('DOMContentLoaded', () => {
         m.classList.remove('open');
         document.body.style.overflow = '';
     }
-    document.querySelectorAll('[data-modal-open]').forEach(btn => {
-        btn.addEventListener('click', () => openModal(btn.dataset.modalOpen));
-    });
+    document.querySelectorAll('[data-modal-open]').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.modalOpen)));
     modals.forEach(m => {
         m.addEventListener('click', (e) => { if (e.target === m) closeModal(m); });
-        m.querySelectorAll('[data-modal-close]').forEach(b => {
-            b.addEventListener('click', () => closeModal(m));
-        });
+        m.querySelectorAll('[data-modal-close]').forEach(b => b.addEventListener('click', () => closeModal(m)));
     });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') document.querySelectorAll('.modal.open').forEach(closeModal);
-    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal.open').forEach(closeModal); });
 
     /* ---------- Selector de país para teléfono (intl-tel-input) ---------- */
     const telInput = document.getElementById('telefono');
     let iti = null;
+    let itiReady = false; // Bandera para saber si el plugin terminó de cargar
 
     if (telInput && typeof window.intlTelInput === 'function') {
         iti = window.intlTelInput(telInput, {
@@ -253,6 +213,20 @@ document.addEventListener('DOMContentLoaded', () => {
             separateDialCode: true,
             utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.0/build/js/utils.js'
         });
+
+        // SOLUCIÓN: Esperar a que el plugin (y utils.js) estén listos
+        if (iti.promise) {
+            iti.promise.then(() => {
+                itiReady = true;
+            }).catch((err) => {
+                logError('Error cargando utils de intl-tel-input:', err);
+                // Fallback: marcar como listo aunque falle, para no bloquear el envío
+                itiReady = true;
+            });
+        } else {
+            // Versiones antiguas sin promise
+            itiReady = true;
+        }
     }
 
     /* ---------- Servicio preseleccionado ---------- */
@@ -281,10 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const headerH = header ? header.offsetHeight : 0;
                 const top = form.getBoundingClientRect().top + window.scrollY - headerH - 20;
                 window.scrollTo({ top, behavior: 'smooth' });
-                setTimeout(() => {
-                    const first = document.getElementById('nombre');
-                    if (first) first.focus({ preventScroll: true });
-                }, 500);
+                setTimeout(() => { const first = document.getElementById('nombre'); if (first) first.focus({ preventScroll: true }); }, 500);
             }
         });
     });
@@ -315,12 +286,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const submitBtn = form.querySelector('button[type="submit"]');
             const label = submitBtn.querySelector('.btn-label');
             const originalText = label ? label.textContent : submitBtn.textContent;
-
             const emailInput = document.getElementById('email');
 
             // Validación: al menos correo o teléfono
             emailInput.setCustomValidity('');
-
             const hasEmail = emailInput.value.trim() !== '';
             const hasTel = telInput.value.trim() !== '';
 
@@ -329,11 +298,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 emailInput.reportValidity();
                 return;
             }
-
-            // Validación nativa (nombre, formato de correo, mensaje)
             if (!form.reportValidity()) return;
 
-            // Verificar que la URL del Apps Script esté configurada
+            // Verificar URL del Apps Script
             if (!CONFIG.appsScriptUrl || CONFIG.appsScriptUrl.includes('TU_URL')) {
                 msg.textContent = 'El formulario aún no está conectado. Escríbenos a ' + (CONFIG.contactEmail || 'informacion@grupohcmc.com') + '.';
                 msg.style.background = 'rgba(255,176,32,.15)';
@@ -342,8 +309,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Preparar payload (teléfono con código de país si el plugin está activo)
-            const telefonoCompleto = (iti && hasTel) ? iti.getNumber() : telInput.value.trim();
+            // ---- SOLUCIÓN AL NÚMERO VACÍO ----
+            // Esperar a que el plugin esté listo antes de leer getNumber()
+            if (hasTel && iti && !itiReady) {
+                // Si el plugin aún no está listo, esperamos su promesa
+                try {
+                    await iti.promise;
+                    itiReady = true;
+                } catch (err) {
+                    logError('Error esperando a iti.promise:', err);
+                }
+            }
+
+            // Preparar teléfono
+            let telefonoCompleto = '';
+            if (hasTel) {
+                if (iti && itiReady) {
+                    // Forzar sincronización del input antes de leer
+                    // (aunque el usuario acaba de escribir, el plugin ya debería tenerlo)
+                    telefonoCompleto = iti.getNumber() || '';
+                }
+                // Fallback: si getNumber() sigue vacío, concatenar manualmente
+                if (!telefonoCompleto) {
+                    const telLimpio = telInput.value.trim().replace(/[\s\-()]/g, '');
+                    if (telLimpio) {
+                        const countryData = iti ? iti.getSelectedCountryData() : null;
+                        const dialCode = (countryData && countryData.dialCode) ? '+' + countryData.dialCode : '+506';
+                        telefonoCompleto = dialCode + telLimpio;
+                    }
+                }
+            }
 
             const payload = {
                 nombre: document.getElementById('nombre').value.trim(),
@@ -370,7 +365,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
-
                 if (data.success) {
                     msg.textContent = '¡Gracias por tu mensaje! Te contactaremos pronto.';
                     msg.style.background = 'rgba(0,184,169,.12)';
@@ -418,6 +412,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 vy: (Math.random() - 0.5) * 0.25 * devicePixelRatio,
             }));
         }
+        function drawStatic() {
+            ctx.clearRect(0, 0, w, h);
+            const maxDist = 160 * devicePixelRatio;
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const a = nodes[i], b = nodes[j];
+                    const dx = a.x - b.x, dy = a.y - b.y;
+                    const d = Math.sqrt(dx * dx + dy * dy);
+                    if (d < maxDist) {
+                        ctx.strokeStyle = `rgba(0,184,169,${(1 - d / maxDist) * 0.35})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+                    }
+                }
+            }
+            for (const n of nodes) {
+                ctx.fillStyle = 'rgba(0,184,169,0.85)';
+                ctx.beginPath(); ctx.arc(n.x, n.y, 1.8 * devicePixelRatio, 0, Math.PI * 2); ctx.fill();
+            }
+        }
         function draw() {
             if (!visible) { rafId = null; return; }
             ctx.clearRect(0, 0, w, h);
@@ -437,59 +451,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (d < maxDist) {
                         ctx.strokeStyle = `rgba(0,184,169,${(1 - d / maxDist) * 0.35})`;
                         ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(a.x, a.y);
-                        ctx.lineTo(b.x, b.y);
-                        ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
                     }
                 }
             }
             for (const n of nodes) {
                 ctx.fillStyle = 'rgba(0,184,169,0.85)';
-                ctx.beginPath();
-                ctx.arc(n.x, n.y, 1.8 * devicePixelRatio, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(n.x, n.y, 1.8 * devicePixelRatio, 0, Math.PI * 2); ctx.fill();
             }
             rafId = requestAnimationFrame(draw);
         }
         function start() { if (!rafId) rafId = requestAnimationFrame(draw); }
 
-        // Si el usuario prefiere movimiento reducido, dibujamos una vez y no animamos
         resize(); initNodes();
         if (prefersReduced) {
-            // Dibujo estático: no se llama a requestAnimationFrame
-            ctx.clearRect(0, 0, w, h);
-            const maxDist = 160 * devicePixelRatio;
-            for (let i = 0; i < nodes.length; i++) {
-                for (let j = i + 1; j < nodes.length; j++) {
-                    const a = nodes[i], b = nodes[j];
-                    const dx = a.x - b.x, dy = a.y - b.y;
-                    const d = Math.sqrt(dx * dx + dy * dy);
-                    if (d < maxDist) {
-                        ctx.strokeStyle = `rgba(0,184,169,${(1 - d / maxDist) * 0.35})`;
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(a.x, a.y);
-                        ctx.lineTo(b.x, b.y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            for (const n of nodes) {
-                ctx.fillStyle = 'rgba(0,184,169,0.85)';
-                ctx.beginPath();
-                ctx.arc(n.x, n.y, 1.8 * devicePixelRatio, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            drawStatic();
         } else {
             start();
             window.addEventListener('resize', () => { resize(); initNodes(); });
             if ('IntersectionObserver' in window) {
                 new IntersectionObserver((entries) => {
-                    entries.forEach(en => {
-                        visible = en.isIntersecting;
-                        if (visible) start();
-                    });
+                    entries.forEach(en => { visible = en.isIntersecting; if (visible) start(); });
                 }, { threshold: 0 }).observe(canvas);
             }
         }
