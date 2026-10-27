@@ -7,6 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const CONFIG = (typeof HCMC_CONFIG !== 'undefined') ? HCMC_CONFIG : {};
 
+    /* ---------- Logging condicional (solo en desarrollo) ---------- */
+    const IS_DEV = location.hostname === 'localhost' ||
+        location.hostname === '127.0.0.1' ||
+        location.protocol === 'file:';
+
+    function logError(...args) {
+        if (IS_DEV) console.error(...args);
+    }
+
     /* ---------- Año ---------- */
     document.querySelectorAll('[data-year]').forEach(el => {
         el.textContent = new Date().getFullYear();
@@ -316,22 +325,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const hasTel = telInput.value.trim() !== '';
 
             if (!hasEmail && !hasTel) {
-                const m = 'Debes ingresar al menos un correo o un teléfono.';
-                emailInput.setCustomValidity(m);
+                emailInput.setCustomValidity('Debes ingresar al menos un correo o un teléfono.');
                 emailInput.reportValidity();
                 return;
             }
 
-            if (hasEmail && !emailInput.checkValidity()) {
-                emailInput.reportValidity();
-                return;
-            }
-
-            // Validación nativa del resto (nombre, mensaje)
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
+            // Validación nativa (nombre, formato de correo, mensaje)
+            if (!form.reportValidity()) return;
 
             // Verificar que la URL del Apps Script esté configurada
             if (!CONFIG.appsScriptUrl || CONFIG.appsScriptUrl.includes('TU_URL')) {
@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 msg.style.background = 'rgba(255,60,60,.12)';
                 msg.style.color = '#c0392b';
                 msg.classList.add('show');
-                console.error('Error al enviar:', err);
+                logError('Error al enviar:', err);
             } finally {
                 submitBtn.disabled = false;
                 if (label) {
@@ -454,15 +454,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         function start() { if (!rafId) rafId = requestAnimationFrame(draw); }
 
-        resize(); initNodes(); start();
-        window.addEventListener('resize', () => { resize(); initNodes(); });
-        if ('IntersectionObserver' in window) {
-            new IntersectionObserver((entries) => {
-                entries.forEach(en => {
-                    visible = en.isIntersecting;
-                    if (visible) start();
-                });
-            }, { threshold: 0 }).observe(canvas);
+        // Si el usuario prefiere movimiento reducido, dibujamos una vez y no animamos
+        resize(); initNodes();
+        if (prefersReduced) {
+            // Dibujo estático: no se llama a requestAnimationFrame
+            ctx.clearRect(0, 0, w, h);
+            const maxDist = 160 * devicePixelRatio;
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const a = nodes[i], b = nodes[j];
+                    const dx = a.x - b.x, dy = a.y - b.y;
+                    const d = Math.sqrt(dx * dx + dy * dy);
+                    if (d < maxDist) {
+                        ctx.strokeStyle = `rgba(0,184,169,${(1 - d / maxDist) * 0.35})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(a.x, a.y);
+                        ctx.lineTo(b.x, b.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            for (const n of nodes) {
+                ctx.fillStyle = 'rgba(0,184,169,0.85)';
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, 1.8 * devicePixelRatio, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        } else {
+            start();
+            window.addEventListener('resize', () => { resize(); initNodes(); });
+            if ('IntersectionObserver' in window) {
+                new IntersectionObserver((entries) => {
+                    entries.forEach(en => {
+                        visible = en.isIntersecting;
+                        if (visible) start();
+                    });
+                }, { threshold: 0 }).observe(canvas);
+            }
         }
     }
 

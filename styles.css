@@ -29,7 +29,6 @@
 
     --header-h: 76px;
     --header-h-compact: 68px;
-    --gap: 16px;
 }
 
 *,
@@ -121,6 +120,23 @@ ul {
     display: inline-block;
 }
 
+/* ===== Foco visible accesible ===== */
+.btn:focus-visible,
+.nav-toggle:focus-visible,
+.carousel-btn:focus-visible,
+.service-chip button:focus-visible,
+.to-top:focus-visible,
+.read-more:focus-visible,
+.nav-links a:focus-visible,
+.footer-links a:focus-visible,
+.info-row .value a:focus-visible,
+.modal-close:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+/* ===== Botones ===== */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -265,7 +281,6 @@ body.scrolled .nav-wrap {
 .logo-img {
     width: 48px;
     height: 48px;
-    border-radius: 8px;
     object-fit: contain;
     flex-shrink: 0;
     display: block;
@@ -859,8 +874,8 @@ section {
 }
 
 .badge-live {
-    background: rgba(255, 176, 32, .18);
-    color: #A36A00;
+    background: rgba(255, 176, 32, .22);
+    color: #7A4F00;
 }
 
 .badge-service {
@@ -1397,7 +1412,7 @@ section {
     font-size: .75rem;
     text-transform: uppercase;
     letter-spacing: .06em;
-    color: rgba(255, 255, 255, .5);
+    color: rgba(255, 255, 255, .65);
     margin-bottom: 2px;
 }
 
@@ -1454,7 +1469,7 @@ footer {
 }
 
 .footer-brand p {
-    color: rgba(255, 255, 255, .55);
+    color: rgba(255, 255, 255, .6);
     max-width: 340px;
     font-size: .92rem;
     line-height: 1.6;
@@ -1478,7 +1493,7 @@ footer h4 {
 
 .footer-links a,
 .footer-links li {
-    color: rgba(255, 255, 255, .6);
+    color: rgba(255, 255, 255, .7);
     font-size: .9rem;
     transition: color .2s ease;
 }
@@ -1598,6 +1613,10 @@ footer h4 {
 
 /* =========================================================
    intl-tel-input — alineación y dropdown visible
+   NOTA: revisar estas reglas al actualizar intl-tel-input
+   (versión actual: 25.3.0). El plugin inyecta un
+   style="padding-left: XXpx" inline que estas reglas
+   con !important sobrescriben.
    ========================================================= */
 .iti,
 .iti * {
@@ -1609,7 +1628,6 @@ footer h4 {
     display: block !important;
     position: relative !important;
     z-index: 10;
-    /* crea stacking context para el dropdown */
 }
 
 .iti input.iti__tel-input,
@@ -1655,7 +1673,6 @@ footer h4 {
     align-self: center !important;
 }
 
-/* Dropdown de países: que se dibuje por encima del footer */
 .iti__country-list {
     z-index: 9999 !important;
     border-radius: 12px !important;
